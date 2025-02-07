@@ -13,4 +13,9 @@ app.use(urlencoded({extended:true,limit:"16kb"}))  //parameters not much needed
 app.use(express.static("public"))   //to serve files from public folder
 app.use(cookieParser()) ;
 
+//defining the routes
+import userRouter from "./routes/User.routes.js"
+
+app.use("/api/v1/users",userRouter);
+
 export { app };
