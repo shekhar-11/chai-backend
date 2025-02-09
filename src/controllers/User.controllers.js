@@ -3,7 +3,7 @@
 import { asyncHandler } from "../utils/asyncHandler.js";
 import { ApiError } from "../utils/ApiError.js"
 import {uploadOnCloud} from "../utils/cloudinary.js"
-import {User} from "..models/User.models.js";
+import {User} from "../models/User.models.js";
 import {ApiResponse} from "../utils/ApiResponse.js"
 // here we generally write the logic 
 
@@ -29,7 +29,7 @@ const registerUser = asyncHandler(async (req,res) =>{
     }
 
     
-    const existedUser = User.findOne({$or:[{username},{email}]});
+    const existedUser =await User.findOne({$or:[{username},{email}]});
 
     if(existedUser)
     {
@@ -46,15 +46,16 @@ const registerUser = asyncHandler(async (req,res) =>{
     const avatar = await uploadOnCloud(avatarLocalPath);
     const coverImage = await uploadOnCloud(coverImageLocalPath);
   
-    const user = User.create({
+    const user =await User.create({
       fullName,
       avatar:avatar.url,        //as returned by cloudinary.js
       coverImage: coverImage?.url || "",
       password,
-      username:username.toLowerCase()
+      username:username.toLowerCase(),
+      email
     })
 
-    const createdUser = User.findById(user._id)
+    const createdUser = await User.findById(user._id)
     .select("-password -refreshToken");
 
     if(!createdUser)
@@ -62,13 +63,13 @@ const registerUser = asyncHandler(async (req,res) =>{
       throw new ApiError(500,"Something went wrong while registering the user");
     }
     
-    return res.status(200).json({
+    return res.status(200).json(
       new ApiResponse(
        200,
        createdUser, //as user ,
         "User created Successfully"
       )
-    })
+    )
 })
 
 export {registerUser};
