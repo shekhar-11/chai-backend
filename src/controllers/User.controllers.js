@@ -196,7 +196,7 @@ const logoutUser = asyncHandler(async (req,res)=>
 })
 
 
-const refrshAccessToken  = asyncHandler(async (req,res)=>{
+const refreshAccessToken  = asyncHandler(async (req,res)=>{
    try {
      const incomingRefreshtoken = req.cookie?.refreshToken || req.body?.refreshToken;
  
@@ -239,4 +239,42 @@ const refrshAccessToken  = asyncHandler(async (req,res)=>{
 
 })
 
-export {registerUser,loginUser,logoutUser};
+
+const changePassword= asyncHandler(async(req,res)=>
+{
+  const {oldPassword,newPassword} = req.body;
+
+  if((!oldPassword  || !newPassword))
+  {
+    throw new ApiError(401,"Credentials required");
+  }
+
+  const user = await User.findById(req.user?._id);
+  const isPasswordValid = await user.isPasswordCorrect(oldPassword);
+
+  if(!isPasswordValid)
+  {
+    throw new ApiError(401,"Invalid old password");
+  }
+
+  user.password = newPassword;
+  await user.save({validateBeforeSave:false});
+  return res.status(200).json(
+    200,
+    {
+
+    }
+    ,
+    "Password changed successfully"
+  )
+
+}
+)
+
+const getCurrentUser = asyncHandler(async (req,res)=>
+{
+    return res.status(200).json( new ApiResponse(200,req.user,""))
+}
+)
+
+export {registerUser,loginUser,logoutUser,refreshAccessToken,changePassword,getCurrentUser};

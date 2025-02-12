@@ -25,6 +25,7 @@ export const verifyJwt  = asyncHandler(async (req,_,next)=>
  
    //if user exists add the user in the object
    req.user = user;
+   
  
    next();
  } catch (error) {
